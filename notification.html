@@ -1,0 +1,16 @@
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#ff0000">
+
+<script>
+(function() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                console.log('DJ Werewolf Service Worker Active:', reg.scope);
+            }).catch(function(err) {
+                console.log('Service Worker failed:', err);
+            });
+        });
+    }
+})();
+</script>
