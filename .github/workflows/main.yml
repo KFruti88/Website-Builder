@@ -1,20 +1,32 @@
-name: Deploy PWA to WordPress
+name: Deploy PWA to Werewolf Portal
 on:
   push:
     branches:
-      - main
+      - main # Change to 'master' if your default branch is named master
 jobs:
-  deploy:
+  web-deploy:
+    name: 🐺 Deploying PWA Assets
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: 🚚 Get latest code
         uses: actions/checkout@v3
 
-      - name: FTP Deploy
+      - name: 🚀 FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21 # Standard FTP port
           local-dir: ./
-          server-dir: /public_html/ # Adjust this to your WP root path
+          # IMPORTANT: Point this to the folder where werewolf.ourflora.com lives
+          server-dir: /public_html/
+          # This ensures we don't delete your WordPress files!
+          delete-destination: false 
+          # Only sync the PWA files to keep it clean
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            README.md
+            .github/**
