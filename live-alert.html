@@ -1,0 +1,21 @@
+<div id="wp-custom-wrapper">
+    <button id="notify-btn" style="background:#ff0000; color:#fff; padding:10px; border-radius:5px; box-shadow: 0 0 10px #ff0000; border:none; cursor:pointer;">
+        Enable Live Alerts
+    </button>
+</div>
+
+<script>
+(function() {
+    const btn = document.getElementById('notify-btn');
+    btn.addEventListener('click', function() {
+        Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+                alert('Dern tootin! You are subscribed.');
+                // You can now send a test notification from your server
+            } else {
+                alert('Notifications blocked. You might need to check your browser settings.');
+            }
+        });
+    });
+})();
+</script>
