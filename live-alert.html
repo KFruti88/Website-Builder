@@ -1,21 +1,57 @@
 <div id="wp-custom-wrapper">
-    <button id="notify-btn" style="background:#ff0000; color:#fff; padding:10px; border-radius:5px; box-shadow: 0 0 10px #ff0000; border:none; cursor:pointer;">
+    <button id="werewolf-notify-btn" style="background:#000; color:#ff0000; border:2px solid #ff0000; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 0 15px #ff0000; text-transform: uppercase;">
         Enable Live Alerts
     </button>
 </div>
 
 <script>
 (function() {
-    const btn = document.getElementById('notify-btn');
+    const btn = document.getElementById('werewolf-notify-btn');
+    
+    // Check if they are on iOS but NOT on the home screen yet
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isIOS && !isStandalone) {
+        btn.innerText = "Add to Home Screen for Alerts";
+        btn.style.opacity = "0.7";
+    }
+
     btn.addEventListener('click', function() {
-        Notification.requestPermission().then(function(permission) {
+        if (isIOS && !isStandalone) {
+            alert("To get alerts, tap the 'Share' icon and select 'Add to Home Screen' first.");
+            return;
+        }
+
+        // Request Permission from the Browser
+        Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
-                alert('Dern tootin! You are subscribed.');
-                // You can now send a test notification from your server
+                registerPushSubscription();
             } else {
-                alert('Notifications blocked. You might need to check your browser settings.');
+                console.log("Permission denied for notifications.");
             }
         });
     });
+
+    async function registerPushSubscription() {
+        const swReg = await navigator.serviceWorker.ready;
+        const subscription = await swReg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: 'YOUR_PUBLIC_VAPID_KEY' // I can help you get this from Firebase
+        });
+
+        // Save to your named Firebase instance
+        const db = firebase.app('uniqueInstanceName').firestore();
+        await db.collection('subscribers').doc(subscription.endpoint).set({
+            sub_data: JSON.stringify(subscription),
+            timestamp: new Date(),
+            device: isIOS ? 'iOS' : 'Android'
+        });
+
+        btn.innerText = "Dern Tootin! Subscribed.";
+        btn.style.borderColor = "#00ff00";
+        btn.style.color = "#00ff00";
+        btn.style.boxShadow = "0 0 15px #00ff00";
+    }
 })();
 </script>
